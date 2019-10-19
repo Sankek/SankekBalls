@@ -51,15 +51,22 @@ def new_ball():
     if n < len(vel):
         root.after(2500, new_ball)
 
-# FIXME: some balls are getting stuck in the borders
-# FIXME: balls bounce higher than they initial height
-
 
 def reflection(i):
-    if canv.coords(i+1)[2] > size_X or canv.coords(i+1)[0] < 0:
-        vel[i].refl_x()
-    if canv.coords(i+1)[3] > size_Y or canv.coords(i+1)[1] < 0:
-        vel[i].refl_y()
+    if canv.coords(i+1)[2] >= size_X:
+        if vel[i].x > 0:
+            vel[i].refl_x()
+    elif canv.coords(i+1)[0] <= 0:
+        if vel[i].x < 0:
+            vel[i].refl_x()
+    elif canv.coords(i+1)[3] >= size_Y:
+        if vel[i].y > 0:
+            vel[i].refl_y()
+    elif canv.coords(i+1)[1] <= 0:
+        if vel[i].y < 0:
+            vel[i].refl_y()
+    else:
+        return True
 
 
 vel = [None]*100  # list that stores velocities of balls from the start of the programm
@@ -96,15 +103,16 @@ for t in range(10000):
 
     for i in range(len(vel)):
         if len(canv.coords(i+1)) > 0:  # checks if that ball exists
-            canv.move(i+1, vel[i].x*2, vel[i].y*2)
-            vel[i].add(0, 0.1)
+            canv.move(i+1, vel[i].x, vel[i].y)
             reflection(i)
+            if reflection(i) is True:
+                vel[i].add(0, 0.1)
 
     current_time = int(time.time() - start_time)
     if current_time >= previous_time:
         print('t: ', current_time)
         previous_time += 1
 
-    time.sleep(0.02)
+    time.sleep(0.017)
 
 mainloop()
