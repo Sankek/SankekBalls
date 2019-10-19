@@ -27,6 +27,7 @@ size_X = 1078  # > 200
 size_Y = 600  # > 200
 
 root = Tk()
+root.title('SankekBalls')
 root.geometry(str(size_X) + 'x' + str(size_Y))
 
 
@@ -80,43 +81,44 @@ start_time = time.time()
 current_time = 0
 previous_time = 0
 
-for t in range(10000):
-    canv.update()
-    canv.itemconfigure(1, text='Current time is ' + str(current_time) + ' sec' + '\nScore:' + str(score))
 
-    def click(event):
-        global score
-        '''
-        A way to check if mouse click is on a ball offered by Hirianov
-        x = event.x
-        y = event.y
-        for i in range(len(vel)):
-            if i < n-1:
-                r = float(canv.gettags(i+1)[0])
-                if (canv.coords(i+1)[0]+r/2-x)**2 + (canv.coords(i+1)[1]+r/2-y)**2 <= r**2:
-                    score += 1
-                    canv.itemconfigure(i+1, state='hidden')  # or canv.delete(i+1)
-        '''
-        if len(canv.find_withtag(CURRENT)) > 0 and canv.find_withtag(CURRENT)[0] != 1:
-            canv.delete(CURRENT)
-            score += 1
-        print('score: ', score)
+def click(event):
+    global score
+
+    if len(canv.find_withtag(CURRENT)) > 0 and canv.find_withtag(CURRENT)[0] != 1:
+        canv.delete(CURRENT)
+        score += 1
+    print('score: ', score)
 
 
-    canv.bind('<Button-1>', click)
+canv.bind('<Button-1>', click)
 
-    for i in range(len(vel)):
-        if len(canv.coords(i+2)) > 0:  # checks if that ball exists
-            canv.move(i+2, vel[i].x, vel[i].y)
-            reflection(i)
-            if reflection(i) is True:  # This condition is need to make a ball bouncing with the same velocity
-                vel[i].add(0, 0.3)
+
+def stopwatch():
+    global current_time
+    global previous_time
 
     current_time = int(time.time() - start_time)
     if current_time >= previous_time:
         print('t: ', current_time)
         previous_time += 1
 
-    time.sleep(0.017)
+    canv.itemconfigure(1, text='Current time is ' + str(current_time) + ' sec' + '\nScore:' + str(score))
+
+    root.after(500, stopwatch)
+
+
+def movement():
+    for i in range(len(vel)):
+        if len(canv.coords(i+2)) > 0:  # checks if that ball exists
+            canv.move(i+2, vel[i].x, vel[i].y)
+            reflection(i)
+            if reflection(i) is True:  # This condition is need to make a ball bouncing with the same velocity
+                vel[i].add(0, 0.3)
+    root.after(17, movement)
+
+
+stopwatch()
+movement()
 
 mainloop()
