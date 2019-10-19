@@ -29,8 +29,11 @@ size_Y = 600  # > 200
 root = Tk()
 root.geometry(str(size_X) + 'x' + str(size_Y))
 
+
 canv = Canvas(root, bg='white')
+canv.create_text(200, 50, fill="darkblue", font="Times 20 italic bold")
 canv.pack(fill=BOTH, expand=1)
+
 
 colors = ['red', 'orange', 'yellow', 'green', 'blue']
 
@@ -40,7 +43,6 @@ score = 0
 
 def new_ball():
     global n
-    global x, y, r
     x = randrange(100, size_X-100)
     y = randrange(100, size_Y-100)
     r = randrange(10, 35)
@@ -53,16 +55,16 @@ def new_ball():
 
 
 def reflection(i):
-    if canv.coords(i+1)[2] >= size_X:
+    if canv.coords(i+2)[2] >= size_X:
         if vel[i].x > 0:
             vel[i].refl_x()
-    elif canv.coords(i+1)[0] <= 0:
+    elif canv.coords(i+2)[0] <= 0:
         if vel[i].x < 0:
             vel[i].refl_x()
-    elif canv.coords(i+1)[3] >= size_Y:
+    elif canv.coords(i+2)[3] >= size_Y:
         if vel[i].y > 0:
             vel[i].refl_y()
-    elif canv.coords(i+1)[1] <= 0:
+    elif canv.coords(i+2)[1] <= 0:
         if vel[i].y < 0:
             vel[i].refl_y()
     else:
@@ -71,7 +73,7 @@ def reflection(i):
 
 vel = [None]*100  # list that stores velocities of balls from the start of the programm
 for i in range(len(vel)):
-    vel[i] = Vector(uniform(-2, 2), uniform(-3, 0.5))
+    vel[i] = Vector(uniform(-4, 4), uniform(-3, 0.5))
 
 new_ball()
 start_time = time.time()
@@ -80,6 +82,7 @@ previous_time = 0
 
 for t in range(10000):
     canv.update()
+    canv.itemconfigure(1, text='Current time is ' + str(current_time) + ' sec' + '\nScore:' + str(score))
 
     def click(event):
         global score
@@ -94,19 +97,20 @@ for t in range(10000):
                     score += 1
                     canv.itemconfigure(i+1, state='hidden')  # or canv.delete(i+1)
         '''
-        if len(canv.coords(CURRENT)) > 0:
+        if len(canv.find_withtag(CURRENT)) > 0 and canv.find_withtag(CURRENT)[0] != 1:
             canv.delete(CURRENT)
             score += 1
         print('score: ', score)
 
+
     canv.bind('<Button-1>', click)
 
     for i in range(len(vel)):
-        if len(canv.coords(i+1)) > 0:  # checks if that ball exists
-            canv.move(i+1, vel[i].x, vel[i].y)
+        if len(canv.coords(i+2)) > 0:  # checks if that ball exists
+            canv.move(i+2, vel[i].x, vel[i].y)
             reflection(i)
-            if reflection(i) is True:
-                vel[i].add(0, 0.1)
+            if reflection(i) is True:  # This condition is need to make a ball bouncing with the same velocity
+                vel[i].add(0, 0.3)
 
     current_time = int(time.time() - start_time)
     if current_time >= previous_time:
